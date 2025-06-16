@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 700px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .timer {
+            float: right;
+            font-weight: bold;
+            color: red;
+        }
+        .question {
+            margin-bottom: 30px;
+        }
+        .options label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .submit-btn, .accept-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor:pointer;
+        }
+        .instructions {
+            padding: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="instructions" class="instructions">
+            <h1>Quiz Instructions</h1>
+            <ol>
+                <li>Total duration of the quiz is 2 minutes.</li>
+                <li>All questions are mandatory.</li>
+                <li>Read each question carefully before answering.</li>
+                <li>Select the most appropriate answer.</li>
+                <li>You cannot change your answer after submission.</li>
+                <li>Make sure to click the 'Submit' button once done.</li>
+                <li>All questions are multiple choice.</li>
+                <li>Your score will be shown after submission.</li>
+                <li>If time runs out, quiz will auto-submit.</li>
+                <li>Good luck and do your best!</li>
+            </ol>
+            <button class="accept-btn" onclick="startQuiz()">Accept & Start Quiz</button>
+        </div>
+
+        <div id="quiz-section" class="hidden">
+            <div class="timer" id="timer">2:00</div>
+            <h1>Quiz Time</h1>
+            <form id="quizForm">
+                <div id="questions-container"></div>
+                <button type="button" class="submit-btn" onclick="submitQuiz()">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            { q: "What is the capital of France?", options: ["Paris", "London", "Berlin", "Madrid"], answer: "Paris" },
+            { q: "What is 2 + 2?", options: ["3", "4", "5", "6"], answer: "4" },
+            { q: "Which planet is known as the Red Planet?", options: ["Earth", "Mars", "Jupiter", "Venus"], answer: "Mars" },
+            { q: "Who wrote 'Hamlet'?", options: ["Shakespeare", "Dickens", "Chaucer", "Wordsworth"], answer: "Shakespeare" },
+            { q: "Which element has the chemical symbol O?", options: ["Gold", "Oxygen", "Iron", "Zinc"], answer: "Oxygen" },
+            { q: "What is the boiling point of water?", options: ["100°C", "0°C", "50°C", "150°C"], answer: "100°C" },
+            { q: "Which continent is the largest?", options: ["Asia", "Africa", "Europe", "Antarctica"], answer: "Asia" },
+            { q: "What is H2O commonly known as?", options: ["Hydrogen", "Salt", "Water", "Oxygen"], answer: "Water" },
+            { q: "Which organ pumps blood in the human body?", options: ["Lungs", "Heart", "Liver", "Kidney"], answer: "Heart" },
+            { q: "Which is the smallest prime number?", options: ["0", "1", "2", "3"], answer: "2" },
+            { q: "What language is used for web apps?", options: ["PHP", "Python", "Javascript", "All"], answer: "All" },
+            { q: "Which is not a programming language?", options: ["HTML", "Python", "Ruby", "Java"], answer: "HTML" },
+            { q: "Sun rises in the?", options: ["North", "West", "East", "South"], answer: "East" },
+            { q: "What gas do plants absorb?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Helium"], answer: "Carbon Dioxide" },
+            { q: "What is the freezing point of water?", options: ["100°C", "50°C", "0°C", "-10°C"], answer: "0°C" },
+            { q: "Which is the hardest substance?", options: ["Iron", "Gold", "Diamond", "Silver"], answer: "Diamond" },
+            { q: "Which is the largest mammal?", options: ["Elephant", "Whale", "Human", "Giraffe"], answer: "Whale" },
+            { q: "Who painted Mona Lisa?", options: ["Van Gogh", "Picasso", "Da Vinci", "Rembrandt"], answer: "Da Vinci" },
+            { q: "What is 10 * 10?", options: ["100", "10", "20", "1000"], answer: "100" },
+            { q: "Which gas do we breathe in?", options: ["Nitrogen", "Hydrogen", "Oxygen", "Helium"], answer: "Oxygen" }
+        ];
+
+        let timeLeft = 2 * 60;
+        let timerInterval;
+
+        function startQuiz() {
+            document.getElementById("instructions").classList.add("hidden");
+            document.getElementById("quiz-section").classList.remove("hidden");
+            renderQuestions();
+            startTimer();
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById("questions-container");
+            quizData.forEach((q, i) => {
+                const div = document.createElement("div");
+                div.classList.add("question");
+                div.innerHTML = `
+                    <p><strong>Q${i + 1}: ${q.q}</strong></p>
+                    <div class="options">
+                        ${q.options.map(opt => `<label><input type="radio" name="q${i}" value="${opt}"> ${opt}</label>`).join('')}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    document.getElementById("timer").textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            const form = document.forms["quizForm"];
+            let score = 0;
+            quizData.forEach((q, i) => {
+                const selected = form[`q${i}`].value;
+                if (selected === q.answer) score++;
+            });
+            alert("You scored " + score + " out of " + quizData.length);
+        }
+    </script>
+</body>
+</html>
